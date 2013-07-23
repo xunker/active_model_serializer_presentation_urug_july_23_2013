@@ -3,10 +3,14 @@ class User < ActiveRecord::Base
 
   has_many :images
 
-  def as_json(options={})
-    {
-      :id => id,
-      :name => email.split('@')[0]
-    }
+  def name
+    email.split('@')[0]
   end
+
+  # def as_json(options={})
+  #   {
+  #     :id => id,
+  #     :name => email.split('@')[0]
+  #   }
+  # end
 end

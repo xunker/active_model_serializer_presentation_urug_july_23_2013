@@ -38,3 +38,5 @@ gem 'jquery-rails'
 # gem 'debugger'
 
 gem 'clearance'
+
+gem 'active_model_serializers'
