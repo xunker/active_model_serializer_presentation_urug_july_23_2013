@@ -1,3 +1,147 @@
 == Active Model Serializers Presentation
 
 July 23 2013, URUG slc.rb
+
+== How to navigate this repository
+
+There are two commits to look at:
+
+commit hash cdeb3a00935ef984e6aa07811e6c81023025280e
+This is the first version of the app, where the json is generated using as_json() overrides
+(navigate to this via "git checkout cdeb3a00935ef984e6aa07811e6c81023025280e")
+
+
+commit hash bbd8046fb0fa6f70ba3ce1d6aafcc78232bca966
+This is the same code converted to using serializers
+(navigate to this via "git checkout bbd8046fb0fa6f70ba3ce1d6aafcc78232bca966")
+
+== How to use this app
+
+run rake:db:migrate first.
+
+Create a user at /sign_up
+
+Create an image with the rails console ("rails c") and the following:
+
+  Image.create!(:user_id => '1', :url => "http://placekitten.com/200/300")
+
+There is no web interface. Hit the following JSON urls directly:
+
+/images.json
+/images/1.json
+
+You can log in to the app at /sign_in
+
+You can log out by issuing a DELETE to /sign_out
+
+== Presentation notes
+
+ruby is increasingly becoming the backend workhorse
+
+
+front ends are moving from server-side html to client-side js
+
+
+get data from the backend to the frontend
+
+
+json is preferred
+
+
+show small example of respond_with
+
+
+easy right?
+
+
+what if you want to better control the json?
+..I don't want column X
+..I want some "virtual column" Y
+..I want nested objects?
+
+
+override to_json/as_json
+..which is it?
+..not obvious when to use to_json or as_json
+
+
+check stack overflow
+
+
+they say "try active record serializer"
+
+
+we will.  show example app using as_json():
+
+
+schema:
+
+  Users:
+       id
+       first_name
+       last_name
+       email
+       encrypted_password
+  Pictures
+       id
+       user_id
+       uri
+
+
+we want to send the json for the picture.
+Easy: respond_with(Picture.find(params[:id]))
+
+
+We want to include the user information:
+
+
+old way would be to override to_json/as_json:
+  def as_json … end
+
+
+new way, serializers
+
+
+add serializer to gemfile
+  gem 'active_model_serializers'
+
+
+rails g serializer post
+
+
+serializers support associations, but they don't work how you think
+  ..has_one
+  ..has_many
+  ..no belongs_to
+  ..no habtm
+
+the associations reference the realtionships of the SERIALIZERS, not the models
+
+
+also works with render()
+
+
+method calls: name()
+
+
+exclude email and enc_password (include_[ATTRIBUTE]? or include_associations!), only exclude those when the user themselves is logged in (current_user)
+Have access to fun things like:
+     :attributes - attributes in the serializer, not the model
+     routing helper
+     options -:options - {:prefixes=>["images", "application"], :template=>"show", :layout=>#<Proc:0x007fa9639d4e50@/Users/mnielsen/.rvm/gems/ruby-1.9.3-p392@amspu/gems/actionpack-3.2.12/lib/abstract_controller/layouts.rb:383>, :scope=>nil, :scope_name=>:current_user, :url_options=>{:host=>"localhost", :port=>3000, :protocol=>"http://", :_path_segments=>{:action=>"show", :controller=>"images", :id=>"1"}, :script_name=>""}, :hash=>{}, :unique_values=>{}}
+
+
+specify serializer:
+render json: @post, serializer: FancyPostSerializer
+render json: @posts, each_serializer: FancyPostSerializer
+
+caching
+
+add 'cached' directive
+add cache_key() method
+Disabling the root element
+
+
+specifying serialization type:
+attributes :id, {full_name: :string}
+
